@@ -49,16 +49,22 @@ Event (std::string t,
 
 class Schedule{
 public:
-    Event* events;
-    int nb_events;
+    Event* events;                        /* Liste des évènements enregistrés */
+    int nb_events;                        /* Nombre d'évènements enregistrés */
 
 Schedule();
-void add(Event e);
-void create(int nb_arg, char** args);
-void del(int id);
-void load ();
-void save();
-
+void add(Event e);                         /* Ajoute un évènement à la liste d'events */
+void create(int nb_arg, 
+            char** args);                  /* Créé un évènement à partir de la commande create */
+void del(int id);                          /* Supprime un évènement à partir de la commande delete */
+void load ();                              /* Charge les évènements stockés dans un fichier texte */
+void save();                               /* Enregistre les évènements dans un fichier texte */
+void list(std::string category, 
+            std::string clue);             /* Donne les titres des évènements selon un critère choisi */
+void search(int id);                       /* Donne la description complète d'un évènement trouvé grâce à son id */
+void change(int id,
+            std::string category,
+            std::string new_item);         /* Remplace un détail d'une tâche/ajoute un commentaire */
 };
 
 

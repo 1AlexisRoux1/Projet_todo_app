@@ -131,7 +131,7 @@ void Schedule::create (int nb_arg, char** args){
         i = i +2;
     }
     else{
-        descr = "";
+        descr = "None";
     }                                   // On teste la présence d'un état, "open" par défaut
     if (i<nb_arg && (strargs[i] == "--status")){
         s = args[i+1];
@@ -194,7 +194,6 @@ void Schedule::load(){
     ifstream data{"Schedule.txt"};
     string nb_lignes;                 // Le premier caractère contient le nombre de tâches stockées dans le fichier texte
     getline(data,nb_lignes,'\n');
-    id_giver = stoi(nb_lignes);
     for(int i = 0; i <stoi(nb_lignes); i++){
         string t;     
         string descr;
@@ -227,7 +226,7 @@ void Schedule::load(){
         string strnb_com;
         getline(stream_item,strnb_com,'$');
         nb_com = stoi(strnb_com);        // On récupere le nombre de commentaires
-        com = new string[nb_com];
+        com = new string {"Event Created"};
         for (int j = 0; j<nb_com; j++){  // On récupère les commentaires un par un
             getline(stream_item,com[j],'$');
         }
@@ -259,56 +258,219 @@ void Schedule::load(){
 
 void Schedule::save(){
     ofstream data("Schedule.txt");
+    data<<id_giver<<"\n";     // Correspond au nombre de tâches existantes permet de garder le compte pour des tâches supprimées
     for (int i = 0; i < this->nb_events; i++){
         Event e = this->events[i];
         if(e.id != -1){         // Permet de ne pas sauvegarder les tâches vides
-        cout<<e.title<<"|";
-        cout<<e.date_of_creation<<"|";
-        cout<<e.date_of_end<<"|";
-        cout<<e.description<<"|";
-        cout<<e.status<<"|";
-        cout<<e.advancement<<"|";
-        cout<<e.priority<<"|";
-        cout<<e.nb_comments<<"$";
+        data<<e.title<<"|";
+        data<<e.date_of_creation<<"|";
+        data<<e.date_of_end<<"|";
+        data<<e.description<<"|";
+        data<<e.status<<"|";
+        data<<e.advancement<<"|";
+        data<<e.priority<<"|";
+        data<<e.nb_comments<<"$";
         for (int j = 0; j < e.nb_comments; j++){
-            cout<<e.comments[j]<<"$";
+            data<<e.comments[j]<<"$";
         }
-        cout<<"|";
-        cout<<e.nb_subevents<<"$";
+        data<<"|";
+        data<<e.nb_subevents<<"$";
         for (int j = 0; j < e.nb_subevents; j++){
-            cout<<e.subevents[j]->id<<"$";
+            data<<e.subevents[j]->id<<"$";
         }
-        cout<<"|";
-        cout<<"\n";
+        data<<"|";
+        data<<"\n";
         }
+    }
+}
+
+void Schedule::list(string category, string clue){
+    cout<<"Events with "<<category<<" = "<<clue<<" are : \n";
+    if (category == "--title"){               // Recherche par titre
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].title == clue){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else if (category == "--beginning"){    // Recherche par date de création
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].date_of_creation == stoi(clue)){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else if (category == "--end"){          // Recherche par date de fin
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].date_of_end == stoi(clue)){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else if (category == "--description"){   // Recherche par description
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].description == clue){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        } 
+    } else if (category == "--status"){        // Recherche par statut
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].status == clue){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else if (category == "--advancement"){   // Recherche par avancement
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].advancement == stof(clue)){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else if (category == "--priority"){      // Recherche par priorité
+        for (int i =  0; i < this->nb_events; i++){
+            if (this->events[i].priority == stoi(clue)){
+                cout<<this->events[i].title<<" --> ID = "<<this->events[i].id<<endl;
+            }
+        }
+    } else {
+        cout<<"Invalid category. Search allowed by : \n";
+        cout<<"--title\n";
+        cout<<"--beginning\n";
+        cout<<"--end\n";
+        cout<<"--description\n";
+        cout<<"--status\n";
+        cout<<"--advancement\n";
+        cout<<"--priority\n";
+        cout<<"Don't forget to write -- before the category.";
+    }
+}
+
+void Schedule::search(int id){
+    if (id < this->nb_events){
+        Event e = this->events[id];
+        cout<<"Title : "<<e.title<<endl;
+        cout<<"Description : "<<e.description<<endl;
+        cout<<"Beginning (jjmmaa) : "<<e.date_of_creation<<endl;
+        cout<<"End (jjmmaa) : "<<e.date_of_end<<endl;
+        cout<<"Status : "<<e.status<<endl;
+        cout<<"Advancement : "<<e.advancement<<endl;
+        cout<<"Priority : "<<e.priority<<endl;
+        cout<<"Advancement : "<<e.advancement<<endl;
+        cout<<"Comments : "<<endl;
+        for (int i = 0; i<e.nb_comments; i++){
+            cout<<"  "<<e.comments[i]<<endl;
+        }
+        if (e.nb_subevents>0){
+            cout<<"Subevents : "<<endl;
+            for (int i = 0; i<e.nb_subevents; i++){
+                cout<<"  "<<e.subevents[i]->title<<" --> ID = "<<e.subevents[i]->id<<endl;
+            }
+        }
+    } else {
+        cout<<"Invalid ID \n";
+    }
+}
+
+void Schedule::change(int id, string category, string new_item){
+    if (id < this->nb_events){
+        Event* e = &this->events[id];
+        if (category == "--title"){                    // Change le titre
+            e->title = new_item;
+        } else if (category == "--description"){       // Change la description
+            e->description = new_item;
+        } else if (category == "--beginning"){         // Change la date de création
+            e->date_of_creation = stoi(new_item);
+        } else  if (category == "--end"){              // Change la date de fin
+            e->date_of_end = stoi(new_item);
+        } else if (category == "--status"){            // Change le statut
+            e->status = new_item;
+        } else if (category == "--advancement"){       // Change l'avancement
+            e->advancement = stof(new_item);
+        } else if (category == "--priority"){          // Change la priorité
+            e->priority = stoi(new_item);
+        } else if (category == "--comment"){          // Ajoute un commentaire
+            e->comments[(e->nb_comments)] = new_item;
+            e->nb_comments++;
+        } else if (category == "--subevents"){         // Ajoute un sous-évènement
+            e->subevents[e->nb_subevents] = &this->events[stoi(new_item)];
+            e->nb_subevents++;
+        } else {
+            cout<<"Invalid category. Changes allowed on : \n";
+            cout<<"--title\n";
+            cout<<"--beginning\n";
+            cout<<"--end\n";
+            cout<<"--description\n";
+            cout<<"--status\n";
+            cout<<"--advancement\n";
+            cout<<"--priority\n";
+            cout<<"Addings allowed on : \n";
+            cout<<"--comment \n";
+            cout<<"--subevents \n";
+            cout<<"Don't forget to write -- before the category.";
+        }
+        
+    } else {
+        cout<<"Invalid ID \n";
+    }
+}
+
+void lecture(){        // Lit les 5 premières lignes du fichier texte pour faciliter la compréhension
+    ifstream data("Schedule.txt");
+    string texte;
+    for (int i =0; i<5; i++){
+        getline(data,texte,'\n');
+        cout<<texte<<endl;
     }
 }
 
 // MAIN
 
 int main(int argc, char** argv){
+    id_giver = 0;
     string command;
-    //eventlist = Schedule();
-    eventlist.load();
-    if (argc<2){
+    eventlist = Schedule();
+    try{
+        eventlist.load();
+    }
+    catch (exception _){
+        eventlist.add(Event());
+        cout<<"Data corrupted, file re-initialized \n";
+    }
+    if (argc<2){                             // Vérification de la présence de commandes
         cout<<"No input found\n";
     }
     else{
         command = argv[1];
+        if (command == "create"){           // Création d'un nouvel évènement
+            eventlist.create(argc,argv);
+        }
+        else if (command == "delete"){      // Suppression d'un évènement
+            eventlist.del(stoi(argv[2]));
+            id_giver--;
+        }
+        else if (command == "list"){        // Recherche de tâche par catégorie
+            string category = argv[2];
+            string clue = argv[3];
+            eventlist.list(category,clue);
+        }
+        else if (command == "search"){      // Affichage des détails d'un évènement
+            eventlist.search(stoi(argv[2]));
+        }
+        else if (command == "change"){      // Modifie un élément d'une tâche enregistrée
+            int id = stoi(argv[2]);
+            string category = argv[3];
+            string new_item = argv[4];
+            eventlist.change(id,category,new_item);
+        }
+        else {
+            cout<<"Invalid command"<<endl;
+        }
     }
-    if (command == "create"){
-        eventlist.create(argc,argv);
+    try{
+        eventlist.save();
     }
-    else if (command == "delete"){
-        eventlist.del(stoi(argv[2]));
+    catch (exception _){
+        cout<<"Data corrupted, file re-initialized \n";
+        ofstream data("Schedule.txt");
+        data<<"0\n";
     }
-    else {
-        cout<<"Invalid command"<<endl;
-    }
-    for (int k = 0; k<eventlist.nb_events; k++){
-        cout<<eventlist.events[k].title<<endl;
-    }
-    eventlist.save();
+    lecture();
     return 0;
 }
 // TEST 4
